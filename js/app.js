@@ -47,8 +47,25 @@ function leerDatosCurso(cursoSeleccionado) {
     cantidad: 1,
   };
 
-  // Agrega elementos al arreglo de carrito,sin perder la referencia de cursos agregados
-  articulosCarrito = [...articulosCarrito, infoCurso];
+  // Revisa si un elemento ya existe en el carrito
+  const existe = articulosCarrito.some((curso) => curso.id === infoCurso.id);
+
+  if (existe) {
+    // Actualizamos cantidad, en nuevo arreglo
+    const cursos = articulosCarrito.map((curso) => {
+      if (curso.id === infoCurso.id) {
+        curso.cantidad++;
+        return curso; //retorna el objeto actualizado
+      } else {
+        return curso; //retorna los objetos que no son duplicados
+      }
+    });
+
+    articulosCarrito = [...cursos];
+  } else {
+    // Agrega elementos al arreglo de carrito,sin perder la referencia de cursos agregados
+    articulosCarrito = [...articulosCarrito, infoCurso];
+  }
 
   console.table(articulosCarrito);
 
@@ -62,26 +79,16 @@ function carritoHtml() {
 
   // recorrer el arreglo de carrito y por cada curso mostrarlos en HTML
   articulosCarrito.forEach((curso) => {
-    const { } = curso;
+    const {} = curso;
 
     // Crear filas
     const row = document.createElement('tr');
     row.innerHTML = `
-      <td>
-        <img src="${curso.imagen}" width="100">    
-      </td>
-      <td>
-          ${curso.titulo}
-      </td>
-      <td>
-          ${curso.precio}
-      </td>
-      <td>
-          ${curso.cantidad}
-      </td>
-      <td>
-        <a href="#" class="borrar-curso" data-id="${curso.id}"> x </a>
-      </td>
+      <td><img src="${curso.imagen}" width="100"></td>
+      <td>${curso.titulo}</td>
+      <td>${curso.precio}</td>
+      <td>${curso.cantidad}</td>
+      <td><a href="#" class="borrar-curso" data-id="${curso.id}"> x </a> </td>
     `;
 
     // Agregar el HTML al carrito en tbody
