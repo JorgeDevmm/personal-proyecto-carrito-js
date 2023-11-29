@@ -17,6 +17,9 @@ cargarEventListeners();
 
 // Registrar todos mi eventos
 function cargarEventListeners() {
+  // Muestra los cursos de LocalStorage
+  document.addEventListener('DOMContentLoaded', leerDatosCarrito);
+
   // Cuando agregas un curso presionadno "Agregar al carrito"
   listaCursos.addEventListener('click', agregarCurso);
 
@@ -27,11 +30,19 @@ function cargarEventListeners() {
   vaciarCarritoBtn.addEventListener('click', () => {
     articulosCarrito = []; // reseteamos el arreglo
 
-    lipiarHtml(); //eliminamos todo html
+    limpiarHtml(); //eliminamos todo html
   });
 }
 
 // Funciones
+
+// muestra los elementos del carrito si existiera
+function leerDatosCarrito() {
+  // devuelve el string y convertirlo a un estrucutura o un arreglo vacio
+  articulosCarrito = JSON.parse(localStorage.getItem('articulosCarrito')) || [];
+
+  carritoHtml();
+}
 
 function agregarCurso(e) {
   e.preventDefault();
@@ -46,16 +57,31 @@ function agregarCurso(e) {
 
 // Eliminar Curso del carrito
 function eliminarCurso(e) {
+  console.log(e.id);
   // verificamos si se encuentra la clase donde presionamos
   if (e.target.classList.contains('borrar-curso')) {
     // guardamos el id de curso a eliminar
     const cursoId = e.target.getAttribute('data-id');
 
     // guardamos en un nuevo array el los elementos diferente al id eliminado
-    articulosCarrito = articulosCarrito.filter((curso) => curso.id != cursoId);
+    // articulosCarrito = articulosCarrito.filter((curso) => curso.id != cursoId);
 
-    // volvemos a generar html
-    carritoHtml();
+    // Buscar el índice del curso en el array
+    const index = articulosCarrito.findIndex((curso) => curso.id === cursoId);
+
+    // Verificar si el curso existe en el carrito
+    if (index !== -1) {
+      // Si la cantidad es mayor a 1, simplemente disminuir la cantidad
+      if (articulosCarrito[index].cantidad > 1) {
+        articulosCarrito[index].cantidad -= 1;
+      } else {
+        // Si la cantidad es 1, eliminar el curso del array
+        articulosCarrito.splice(index, 1);
+      }
+
+      // volvemos a generar html
+      carritoHtml();
+    }
   }
 }
 
@@ -92,15 +118,13 @@ function leerDatosCurso(cursoSeleccionado) {
     articulosCarrito = [...articulosCarrito, infoCurso];
   }
 
-  console.table(articulosCarrito);
-
   carritoHtml();
 }
 
 // Muestra el carrito de compras en el HTML
 function carritoHtml() {
   // Limpiar el HTML
-  lipiarHtml();
+  limpiarHtml();
 
   // recorrer el arreglo de carrito y por cada curso mostrarlos en HTML
   articulosCarrito.forEach((curso) => {
@@ -119,10 +143,13 @@ function carritoHtml() {
     // Agregar el HTML al carrito en tbody
     contenedorCarrito.appendChild(row);
   });
+
+  // sincronizar con localStorage
+  sincronizarLocalStorage();
 }
 
 // Eliminar los cursos del tbody
-function lipiarHtml() {
+function limpiarHtml() {
   // forma lenta
   // contenedorCarrito.innerHTML = '';
 
@@ -131,4 +158,8 @@ function lipiarHtml() {
     // eliminar un hijo por el primero
     contenedorCarrito.removeChild(contenedorCarrito.firstChild);
   }
+}
+
+function sincronizarLocalStorage() {
+  localStorage.setItem('articulosCarrito', JSON.stringify(articulosCarrito));
 }
